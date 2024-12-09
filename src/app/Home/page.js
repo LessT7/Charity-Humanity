@@ -1,68 +1,88 @@
-import React from 'react';
-
-
-
+"use client";
+import React from "react";
+import { signOutUser } from "../../../services/firebase";
 
 export default function Home() {
+  const handleSignOut = async () => {
+    try {
+      await signOutUser();
+      alert("Berhasil keluar!");
+      window.location.href = "/";
+    } catch (error) {
+      alert("Gagal keluar: " + error.message);
+    }
+  };
+
   return (
     <div>
+      <header className="bg-white shadow">
+        <div className="container mx-auto flex items-center justify-between py-4 px-6">
+          <div className="text-2xl font-bold text-gray-800">Humanity Charity</div>
+          <nav className="space-x-6">
+            <a href="#home" className="text-gray-600 hover:text-gray-800">
+              Home
+            </a>
+            <a href="#about" className="text-gray-600 hover:text-gray-800">
+              Tentang Kami
+            </a>
+            <a href="#programs" className="text-gray-600 hover:text-gray-800">
+              Program
+            </a>
+            <a href="#donate" className="text-gray-600 hover:text-gray-800">
+              Donasi
+            </a>
+            <a href="#contact" className="text-gray-600 hover:text-gray-800">
+              Hubungi Kami
+            </a>
+          </nav>
+          <div className="flex items-center space-x-4">
+            <a
+              href="#donate"
+              className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600"
+            >
+              Donasi Sekarang
+            </a>
+            <button
+              onClick={handleSignOut}
+              className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600"
+            >
+              Sign Out
+            </button>
+          </div>
+        </div>
+      </header>
 
-    <header className="bg-white shadow">
-      <div className="container mx-auto flex items-center justify-between py-4 px-6">
-        <div className="text-2xl font-bold text-gray-800">Humanity Charity</div>
-        <nav className="space-x-6">
-          <a href="#home" className="text-gray-600 hover:text-gray-800">Home</a>
-          <a href="#about" className="text-gray-600 hover:text-gray-800">Tentang Kami</a>
-          <a href="#programs" className="text-gray-600 hover:text-gray-800">Program</a>
-          <a href="#donate" className="text-gray-600 hover:text-gray-800">Donasi</a>
-          <a href="#contact" className="text-gray-600 hover:text-gray-800">Hubungi Kami</a>
-        </nav>
-        <a
-          href="#donate"
-          className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600"
-        >
-          Donasi Sekarang
-        </a>
-      </div>
-    </header>
+      <section
+        id="home"
+        className="bg-cover bg-center h-screen flex items-center justify-center"
+        style={{
+          backgroundImage: "url('/images/gambar2.jpg')",
+        }}
+      >
+        <div className="text-center text-white px-4">
+          <h1 className="text-4xl md:text-6xl font-bold mb-4">
+            Bersama Kita Wujudkan Harapan
+          </h1>
+          <p className="text-lg md:text-xl mb-6">
+            Mari bergabung dalam aksi nyata untuk membantu mereka yang membutuhkan.
+          </p>
+          <a
+            href="#donate"
+            className="bg-green-500 text-white py-3 px-6 rounded text-lg hover:bg-green-600"
+          >
+            Donasi Sekarang
+          </a>
+        </div>
+      </section>
 
-    
-    <section
-      id="home"
-      className="bg-cover bg-center h-screen flex items-center justify-center"
-      style={{
-        backgroundImage: "url('/images/gambar2.jpg')",
-        // backgroundSize: "cover",
-        // backgroundPosition: "center",  
-        // backgroundRepeat: "no-repeat",
-        // width: "100%",
-        // height: "100%",
-      }}
-    >
-      <div className="text-center text-white px-4">
-        <h1 className="text-4xl md:text-6xl font-bold mb-4">
-          Bersama Kita Wujudkan Harapan
-        </h1>
-        <p className="text-lg md:text-xl mb-6">
-          Mari bergabung dalam aksi nyata untuk membantu mereka yang membutuhkan.
-        </p>
-        <a
-          href="#donate"
-          className="bg-green-500 text-white py-3 px-6 rounded text-lg hover:bg-green-600"
-        >
-          Donasi Sekarang
-        </a>
-      </div>
-    </section>
-
-    <section
+      <section
   id="about"
   className="py-16 bg-white text-gray-800"
 >
   <div className="container mx-auto px-6 text-center">
     <h2 className="text-4xl font-bold mb-6">Tentang Kami</h2>
     <p className="text-lg leading-relaxed mb-4">
-      CharityName adalah organisasi yang berfokus pada membantu komunitas yang membutuhkan dengan memberikan akses 
+      Humanity Charity adalah organisasi yang berfokus pada membantu komunitas yang membutuhkan dengan memberikan akses 
       ke pendidikan, makanan, dan kesehatan. Kami percaya bahwa kebersamaan dapat membawa perubahan besar untuk masa depan.
     </p>
     <p className="text-lg leading-relaxed">
@@ -151,14 +171,11 @@ export default function Home() {
     </p>
   </div>
 </section>
-
-
-    
-    <footer className="bg-gray-800 text-white py-6">
+<footer className="bg-gray-800 text-white py-6">
       <div className="container mx-auto text-center">
         <p>&copy; 2024 Humanity Charity Semua Hak Dilindungi.</p>
       </div>
     </footer>
-  </div>
-  )
+    </div>
+  );
 }
