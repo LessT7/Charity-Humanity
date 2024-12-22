@@ -106,7 +106,6 @@ export default function Home() {
 
           <i className="fas fa-school"></i>
         </div>
-        
         <h3 className="text-xl font-semibold mb-3">Pendidikan untuk Semua</h3>
         <p className="text-gray-600">
           Memberikan akses pendidikan gratis untuk anak-anak yang kurang mampu, 
