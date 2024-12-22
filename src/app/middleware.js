@@ -1,15 +1,32 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
+import { getAuth } from "firebase-admin/auth";
 
-export function middleware(request) {
-  const token = request.cookies.get('token'); // Ambil token dari cookie (atau metode autentikasi Anda)
-  
-  const url = request.nextUrl.clone();
-  
-  if (!token && url.pathname === '/Home') {
-    // Jika tidak ada token, redirect ke login
-    url.pathname = '/auth';
+export async function middleware(req) {
+  const token = req.cookies.get("token"); // Ambil token dari cookies
+  const url = req.nextUrl.clone();
+
+  if (!token) {
+    // Redirect ke login jika tidak ada token
+    url.pathname = "/login";
     return NextResponse.redirect(url);
   }
-  
-  return NextResponse.next();
+
+  try {
+    const decodedToken = await getAuth().verifyIdToken(token);
+    if (!decodedToken.admin) {
+      // Redirect jika user bukan admin
+      url.pathname = "/";
+      return NextResponse.redirect(url);
+    }
+  } catch (err) {
+    console.error("Middleware Error:", err);
+    url.pathname = "/login";
+    return NextResponse.redirect(url);
+  }
+
+  return NextResponse.next(); // Izinkan akses jika valid
 }
+
+export const config = {
+  matcher: "/admin/:path*", // Middleware berlaku untuk semua halaman di /admin
+};

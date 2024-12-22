@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import { signOutUser } from "../../../services/firebase";
+// import '../styles/globals.css'; 
 
 export default function Home() {
   const handleSignOut = async () => {
@@ -105,6 +106,7 @@ export default function Home() {
 
           <i className="fas fa-school"></i>
         </div>
+        
         <h3 className="text-xl font-semibold mb-3">Pendidikan untuk Semua</h3>
         <p className="text-gray-600">
           Memberikan akses pendidikan gratis untuk anak-anak yang kurang mampu, 

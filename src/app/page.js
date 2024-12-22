@@ -3,7 +3,7 @@ import { useState } from 'react';
 import Gambar1 from '../../public/images/gambar2.jpg';
 import { useRouter } from 'next/navigation';
 import { loginWithEmailAndPassword, registerWithEmailAndPassword, sendPasswordResetEmail } from '../../services/firebase';
-import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';  // Import Firebase
+import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 
 export default function AuthPage() {
   const [email, setEmail] = useState("");
@@ -23,7 +23,7 @@ export default function AuthPage() {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       console.log("Google Sign-In Successful:", user);
-      router.push('/Home');
+        router.push('/Home');
     } catch (err) {
       if (err.code === 'auth/popup-closed-by-user') {
         console.log('The popup was closed before authentication was completed.');
@@ -53,8 +53,11 @@ export default function AuthPage() {
       } else {
         const user = await loginWithEmailAndPassword(email, password);
         console.log("Logged in:", user);
-        router.push('/Home');
-        
+        if (email === 'arap@gmail.com' && password === '12345678') {
+          router.push('/admin');
+        }else{
+          router.push('/Home');
+        }        
       }
       setError(null);
     } catch (err) {
