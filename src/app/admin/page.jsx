@@ -13,6 +13,7 @@ import {
 import { db } from "../../../services/firebase";
 import { signOutUser } from "../../../services/firebase";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import Link from "next/link";
 
 const AdminPage = () => {
   const [data, setData] = useState([]);
@@ -150,21 +151,28 @@ const AdminPage = () => {
   };
 
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold mb-4">Admin Page</h1>
+    <div className="p-8 flex flex-col">
+      <h1 className="text-2xl font-bold mb-4">Humanity-Charity Admin Page</h1>
 
       {currentUser && (
         <div className="mb-4">
-          <p>Welcome, <strong>{currentUser.email}</strong></p>
+          <p>Welcome Administrator, The Greatest One of Human Kind <strong>{currentUser.email}</strong></p>
         </div>
       )}
 
       <button
         onClick={handleSignOut}
-        className="bg-red-500 text-white py-2 px-4 rounded mb-4 hover:bg-red-600"
+        className="bg-red-500 text-white py-2 px-4 rounded mb-4 hover:bg-red-600 w-[100px]"
       >
         Sign Out
       </button>
+
+      <Link
+        href="../catchApi"
+        className="bg-blue-600 text-white py-2 px-4 rounded mb-4 hover:bg-blue-700 w-[100px] flex justify-center"
+      >
+        News
+      </Link>
 
       <form onSubmit={isEditing ? handleSaveEdit : handleAddData} className="mb-6">
         <div className="mb-4">

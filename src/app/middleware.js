@@ -1,32 +1,18 @@
-import { NextResponse } from "next/server";
-import { getAuth } from "firebase-admin/auth";
+import { verifyJWT } from "../../utils/jwt";
 
-export async function middleware(req) {
-  const token = req.cookies.get("token"); // Ambil token dari cookies
-  const url = req.nextUrl.clone();
+export default function handler(req, res) {
+  const token = req.headers.authorization?.split(" ")[1];
 
   if (!token) {
-    // Redirect ke login jika tidak ada token
-    url.pathname = "/login";
-    return NextResponse.redirect(url);
+    return res.status(401).json({ message: "Token not provided" });
   }
 
   try {
-    const decodedToken = await getAuth().verifyIdToken(token);
-    if (!decodedToken.admin) {
-      // Redirect jika user bukan admin
-      url.pathname = "/";
-      return NextResponse.redirect(url);
-    }
-  } catch (err) {
-    console.error("Middleware Error:", err);
-    url.pathname = "/login";
-    return NextResponse.redirect(url);
+    const decoded = verifyJWT(token);
+    req.user = decoded; // Tambahkan data user ke request
+    return res.status(200).json({ message: "Authorized", user: decoded });
+  } catch (error) {
+    console.error("JWT verification error:", error.message);
+    return res.status(401).json({ message: "Invalid or expired token" });
   }
-
-  return NextResponse.next(); // Izinkan akses jika valid
 }
-
-export const config = {
-  matcher: "/admin/:path*", // Middleware berlaku untuk semua halaman di /admin
-};

@@ -19,6 +19,7 @@ import {
   getDocs, 
   setDoc 
 } from "firebase/firestore";
+// import { createJWT } from "./jwt";
 
 // Firebase Config from Environment Variables
 const firebaseConfig = {
@@ -43,19 +44,28 @@ export const loginWithEmailAndPassword = async (email, password) => {
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
-
-    const userRef = doc(db, "users", user.uid);
+    
+    // const token = createJWT({
+    //   uid: user.uid,
+    //   email: user.email
+    // });
+    const userRef = doc(db, "users", user.uid); console.log(user);
     await setDoc(
       userRef,
       {
         email: user.email,
+        // password: user.password,
         uid: user.uid,
         lastLoginAt: new Date().toISOString(),
       },
       { merge: true }
     );
+    // gausah ya bang
 
-    return user;
+    // localStorage.setItem("token", token);
+    // alert("Login berhasil!");
+
+    return { user }; // tambahkan token
   } catch (error) {
     throw new Error(error.message);
   }
@@ -68,10 +78,16 @@ export const registerWithEmailAndPassword = async (email, password) => {
 
     await setDoc(doc(db, "users", uid), {
       email: email,
+      password: password,
       createdAt: new Date().toISOString(),
     });
 
-    return userCredential.user;
+    // const token = createJWT({
+    //   uid: uid,
+    //   email: email
+    // });
+
+    return { user: userCredential.user }; // tambahkan token
   } catch (error) {
     throw error;
   }
@@ -118,7 +134,6 @@ export const signInWithGoogle = async () => {
   }
 };
 
-// Firestore CRUD Operations
 export const addData = async (collectionName, data) => {
   try {
     const docRef = await addDoc(collection(db, collectionName), data);
@@ -155,4 +170,13 @@ export const deleteData = async (collectionName, id) => {
   }
 };
 
-export { app, db };
+export const fetchEvents = async () => {
+  const response = await fetch("/api");
+  if (!response.ok) {
+    throw new Error("Failed to fetch events");
+  }
+  return response.json();
+};
+
+
+export  { app, db };
