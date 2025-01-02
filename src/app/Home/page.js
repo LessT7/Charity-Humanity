@@ -67,11 +67,11 @@ export default function Home() {
       window.snap.pay(token, {
         onSuccess: function (result) {
           console.log("Payment success:", result);
-          window.location.href = "/user?status=success";
+          window.location.href = "/Home?status=success";
         },
         onPending: function (result) {
           console.log("Payment pending:", result);
-          window.location.href = "/user?status=pending";
+          window.location.href = "/Home?status=pending";
         },
         onError: function (result) {
           console.error("Payment error:", result);
