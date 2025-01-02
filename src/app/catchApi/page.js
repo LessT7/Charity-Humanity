@@ -101,6 +101,8 @@ export default function EventList() {
     }
   };
 
+
+
   return (
     <div className="bg-gray-100 min-h-screen py-10 px-5">
       <div className="max-w-6xl mx-auto">

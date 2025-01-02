@@ -1,18 +1,20 @@
-import { verifyJWT } from "../../utils/jwt";
+import jwt from "jsonwebtoken";
 
-export default function handler(req, res) {
-  const token = req.headers.authorization?.split(" ")[1];
-
+// Middleware untuk memverifikasi token JWT
+export default function verifyToken(req, res, next) {
+  const token = req.headers.authorization?.split(" ")[1]; // Ambil token dari header Authorization
+  
   if (!token) {
-    return res.status(401).json({ message: "Token not provided" });
+    return res.status(401).json({ error: "No token provided" });
   }
 
   try {
-    const decoded = verifyJWT(token);
-    req.user = decoded; // Tambahkan data user ke request
-    return res.status(200).json({ message: "Authorized", user: decoded });
-  } catch (error) {
-    console.error("JWT verification error:", error.message);
-    return res.status(401).json({ message: "Invalid or expired token" });
+    const decoded = jwt.verify(token, process.env.JWT_SECRET); // Verifikasi token
+    req.user = decoded; // Simpan data user yang sudah didecode di req.user
+    next(); // Lanjutkan ke route berikutnya
+  } catch (err) {
+    return res.status(401).json({ error: "Invalid or expired token" });
   }
 }
+
+

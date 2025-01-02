@@ -34,6 +34,8 @@ export default function AuthPage() {
     }
   };
 
+  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);

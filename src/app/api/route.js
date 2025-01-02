@@ -4,6 +4,7 @@ import {db} from "../../../services/firebase";
 import fs from "fs";
 import path from "path";
 
+
 export async function GET() {
   try {
     const eventCollection = collection(db, "news");

@@ -1,22 +1,19 @@
 import jwt from "jsonwebtoken";
 
-// Secret key untuk menandatangani JWT (gunakan environment variable untuk keamanan)
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
-
-// Durasi token (misalnya 1 hari)
-const TOKEN_EXPIRATION = "1d";
-
-// Fungsi untuk membuat JWT
-export const createJWT = (payload) => {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: TOKEN_EXPIRATION });
+// Fungsi untuk membuat JWT Token
+export const generateToken = (user) => {
+  return jwt.sign(
+    { email: user.email, id: user.id }, 
+    process.env.JWT_SECRET, 
+    { expiresIn: "1h" } // Token berlaku selama 1 jam
+  );
 };
 
-// Fungsi untuk memverifikasi JWT
-export const verifyJWT = (token) => {
+// Fungsi untuk memverifikasi JWT Token
+export const verifyToken = (token) => {
   try {
-    return jwt.verify(token, JWT_SECRET);
+    return jwt.verify(token, process.env.JWT_SECRET); // Verifikasi token
   } catch (error) {
-    console.error("JWT verification error:", error.message);  
     throw new Error("Invalid or expired token");
-  }
+  }
 };

@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { signOutUser } from "../../../services/firebase";
 import Image from "next/image";
+// import Checkout from "../components/Checkout";
 // import '../styles/globals.css'; 
 
 export default function Home() {
@@ -17,6 +18,74 @@ export default function Home() {
 
   const [eventList, setEventList] = useState([]);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    // Tambahkan script Snap Midtrans
+    const snapScript = "https://app.sandbox.midtrans.com/snap/snap.js";
+    const clientKey = process.env.NEXT_PUBLIC_CLIENT; // Pastikan ini didefinisikan di .env
+    const script = document.createElement("script");
+    script.src = snapScript;
+    script.setAttribute("data-client-key", clientKey);
+    script.async = true;
+
+    document.body.appendChild(script);
+
+    // Hapus script saat komponen dilepas
+    return () => {
+      document.body.removeChild(script);
+      fetchEvents();
+    };
+  }, []);
+
+  
+  const handlePurchase = async (event) => {
+    const data = {
+      id: event.id || `event-${Date.now()}`, // Gunakan ID unik jika kosong
+      productName: event.title || "Default Event Title",
+      price: event.price || 10000, // Harga dari event
+      quantity: 1,
+    };
+
+    console.log("Data to Send:", data); // Debugging data sebelum dikirim
+
+    try {
+      const response = await fetch("../api/checkout", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch token: ${response.statusText}`);
+      }
+
+      const { token } = await response.json();
+      console.log("Transaction Token:", token);
+
+      window.snap.pay(token, {
+        onSuccess: function (result) {
+          console.log("Payment success:", result);
+          window.location.href = "/user?status=success";
+        },
+        onPending: function (result) {
+          console.log("Payment pending:", result);
+          window.location.href = "/user?status=pending";
+        },
+        onError: function (result) {
+          console.error("Payment error:", result);
+          alert("Terjadi kesalahan dalam pembayaran. Silakan coba lagi.");
+        },
+        onClose: function () {
+          console.log("Payment popup closed");
+        },
+      });
+    } catch (error) {
+      console.error("Error during purchase:", error);
+      alert("Terjadi kesalahan saat melakukan pembelian. Silakan coba lagi.");
+    }
+  };
 
   useEffect(() => {
     fetchEvents();
@@ -57,12 +126,7 @@ export default function Home() {
             </a>
           </nav>
           <div className="flex items-center space-x-4">
-            <a
-              href="#donate"
-              className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600"
-            >
-              Donasi Sekarang
-            </a>
+            
             <button
               onClick={handleSignOut}
               className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600"
@@ -87,12 +151,7 @@ export default function Home() {
           <p className="text-lg md:text-xl mb-6">
             Mari bergabung dalam aksi nyata untuk membantu mereka yang membutuhkan.
           </p>
-          <a
-            href="#donate"
-            className="bg-green-500 text-white py-3 px-6 rounded text-lg hover:bg-green-600"
-          >
-            Donasi Sekarang
-          </a>
+          <button className="bg-green-500 text-white py-3 px-6 rounded text-lg font-medium hover:bg-green-600 transition" onClick={() => handlePurchase(event)}>Donasi Sekarang</button>
         </div>
       </section>
 
