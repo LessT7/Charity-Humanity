@@ -1,3 +1,4 @@
+
 import { signInWithEmailAndPassword } from "firebase/auth";
 import jwt from "jsonwebtoken";
 import { auth } from "../../../../services/firebase"; // Pastikan auth sudah diimpor dengan benar
@@ -19,7 +20,7 @@ export async function POST(req) {
     // Generate JWT token
     const token = jwt.sign(
       { uid: user.uid, email: user.email }, // Payload
-      process.env.NEXT_PUBLIC_JWT_SECRET, // Secret key
+      process.env.JWT_SECRET, // Secret key
       { expiresIn: "1h" } // Token expiration
     );
 

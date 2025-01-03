@@ -1,26 +1,21 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  collection,
-  addDoc,
-  getDocs,
-  updateDoc,
-  deleteDoc,
-  doc,
-  setDoc,
-} from "firebase/firestore";
+import { collection, addDoc, getDocs, updateDoc, deleteDoc, doc, setDoc } from "firebase/firestore";
 import { db } from "../../../services/firebase";
 import { signOutUser } from "../../../services/firebase";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import jwt from "jsonwebtoken";
 
 const AdminPage = () => {
+  const router = useRouter();
   const [data, setData] = useState([]);
   const [formData, setFormData] = useState({ id: "", email: "", password: "" });
   const [isEditing, setIsEditing] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
-
+  const [userData, setUserData] = useState(null);
   const saveUserToFirestore = async (user) => {
     try {
       const userDocRef = doc(db, "users", user.uid);
@@ -33,18 +28,36 @@ const AdminPage = () => {
       console.error("Error saving user:", error);
     }
   };
-  
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      router.push("/");
+      return;
+    }
+
+    try {
+      console.log("Token yang diterima:", token);
+      const decoded = jwt.decode(token);
+      setUserData(decoded);
+    } catch (error) {
+      console.error("Token decoding failed:", error);
+      localStorage.removeItem("token");
+      router.push("/");
+    }
+  }, []);
+
   const syncCurrentUserToFirestore = async () => {
     const auth = getAuth();
     const user = auth.currentUser;
-    
+
     if (user) {
       await saveUserToFirestore(user);
     } else {
       console.log("No user is currently signed in.");
     }
   };
-  
+
   useEffect(() => {
     syncCurrentUserToFirestore();
   }, []);
@@ -140,15 +153,6 @@ const AdminPage = () => {
     }
   };
 
-  const handleSignOut = async () => {
-    try {
-      await signOutUser();
-      console.log("User signed out successfully");
-      window.location.href = "/";
-    } catch (e) {
-      console.error("Error signing out: ", e);
-    }
-  };
 
   return (
     <div className="p-8 flex flex-col">
@@ -156,49 +160,36 @@ const AdminPage = () => {
 
       {currentUser && (
         <div className="mb-4">
-          <p>Welcome Administrator, The Greatest One of Human Kind <strong>{currentUser.email}</strong></p>
+          <p>
+            Welcome Administrator, The Greatest One of Human Kind <strong>{currentUser.email}</strong>
+          </p>
         </div>
       )}
 
       <button
-        onClick={handleSignOut}
+        onClick={() => {
+          localStorage.removeItem("token");
+          router.push("/");
+        }}
         className="bg-red-500 text-white py-2 px-4 rounded mb-4 hover:bg-red-600 w-[100px]"
       >
         Sign Out
-      </button>
+      </button>
 
-      <Link
-        href="../catchApi"
-        className="bg-blue-600 text-white py-2 px-4 rounded mb-4 hover:bg-blue-700 w-[100px] flex justify-center"
-      >
+      <Link href="../catchApi" className="bg-blue-600 text-white py-2 px-4 rounded mb-4 hover:bg-blue-700 w-[100px] flex justify-center">
         News
       </Link>
 
       <form onSubmit={isEditing ? handleSaveEdit : handleAddData} className="mb-6">
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2">Email</label>
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleInputChange}
-            className="w-full border border-gray-300 rounded p-2"
-          />
+          <input type="email" name="email" value={formData.email} onChange={handleInputChange} className="w-full border border-gray-300 rounded p-2" />
         </div>
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2">Password</label>
-          <input
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleInputChange}
-            className="w-full border border-gray-300 rounded p-2"
-          />
+          <input type="password" name="password" value={formData.password} onChange={handleInputChange} className="w-full border border-gray-300 rounded p-2" />
         </div>
-        <button
-          type="submit"
-          className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
-        >
+        <button type="submit" className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
           {isEditing ? "Save Changes" : "Add User"}
         </button>
       </form>
@@ -220,16 +211,10 @@ const AdminPage = () => {
                 <td className="border border-gray-300 p-2">{item.email}</td>
                 <td className="border border-gray-300 p-2">{item.password}</td>
                 <td className="border border-gray-300 p-2">
-                  <button
-                    onClick={() => handleEditData(item.id)}
-                    className="bg-yellow-500 text-white py-1 px-2 rounded hover:bg-yellow-600 mr-2"
-                  >
+                  <button onClick={() => handleEditData(item.id)} className="bg-yellow-500 text-white py-1 px-2 rounded hover:bg-yellow-600 mr-2">
                     Edit
                   </button>
-                  <button
-                    onClick={() => handleDeleteData(item.id)}
-                    className="bg-red-500 text-white py-1 px-2 rounded hover:bg-red-600"
-                  >
+                  <button onClick={() => handleDeleteData(item.id)} className="bg-red-500 text-white py-1 px-2 rounded hover:bg-red-600">
                     Delete
                   </button>
                 </td>
@@ -244,4 +229,4 @@ const AdminPage = () => {
   );
 };
 
-export default AdminPage;
+export default AdminPage;

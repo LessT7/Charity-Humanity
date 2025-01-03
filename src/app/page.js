@@ -1,9 +1,9 @@
 "use client";
-import { useState } from 'react';
-import Gambar1 from '../../public/images/gambar2.jpg';
-import { useRouter } from 'next/navigation';
-import { loginWithEmailAndPassword, registerWithEmailAndPassword, sendPasswordResetEmail } from '../../services/firebase';
-import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { useState } from "react";
+import Gambar1 from "../../public/images/gambar2.jpg";
+import { useRouter } from "next/navigation";
+import { loginWithEmailAndPassword, registerWithEmailAndPassword, sendPasswordResetEmail } from "../../services/firebase";
+import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 
 export default function AuthPage() {
   const [email, setEmail] = useState("");
@@ -14,7 +14,6 @@ export default function AuthPage() {
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const router = useRouter();
 
-
   const handleGoogleSignIn = async () => {
     const auth = getAuth();
     const provider = new GoogleAuthProvider();
@@ -23,18 +22,16 @@ export default function AuthPage() {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       console.log("Google Sign-In Successful:", user);
-        router.push('/Home');
+      router.push("/Home");
     } catch (err) {
-      if (err.code === 'auth/popup-closed-by-user') {
-        console.log('The popup was closed before authentication was completed.');
-        setError('Login with Google was cancelled. Please try again.');
+      if (err.code === "auth/popup-closed-by-user") {
+        console.log("The popup was closed before authentication was completed.");
+        setError("Login with Google was cancelled. Please try again.");
       } else {
         setError(err.message);
       }
     }
   };
-
-  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -55,11 +52,36 @@ export default function AuthPage() {
       } else {
         const user = await loginWithEmailAndPassword(email, password);
         console.log("Logged in:", user);
-        if (email === 'arap@gmail.com' && password === '12345678') {
-          router.push('/admin');
-        }else{
-          router.push('/Home');
-        }        
+        try {
+          const response = await fetch("/../api/login", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ email, password }),
+          });
+
+          if (!response.ok) {
+            throw new Error("Invalid email or password.");
+          }
+
+          const data = await response.json(); // Ambil data dari API
+
+          if (data.token) {
+            localStorage.setItem("token", data.token); // Menyimpan token ke localStorage
+            console.log("Token disimpan:", data.token); // Debugging token
+
+            if (email === "arap@gmail.com" && password === "12345678") {
+              router.push("/admin");
+            } else {
+              router.push("/Home");
+            }
+          } else {
+            setError("Failed to retrieve token. Please try again.");
+          }
+        } catch (err) {
+          setError(err.message || "An error occurred. Please try again.");
+        }
       }
       setError(null);
     } catch (err) {
@@ -69,91 +91,49 @@ export default function AuthPage() {
   };
 
   return (
-    <div
-      className="flex items-center justify-center h-screen bg-gray-100"
-      style={{ backgroundImage: `url(${Gambar1.src})`, backgroundSize: 'cover' }}
-    >
+    <div className="flex items-center justify-center h-screen bg-gray-100" style={{ backgroundImage: `url(${Gambar1.src})`, backgroundSize: "cover" }}>
       <div className="bg-white p-8 rounded-lg shadow-md w-96 h-auto">
         <form onSubmit={handleSubmit} className="mt-4">
-          <h2 className="text-3xl font-bold text-center">
-            {isForgotPassword
-              ? "Forgot Password"
-              : isRegister
-              ? "Register"
-              : "Login"}
-          </h2>
+          <h2 className="text-3xl font-bold text-center">{isForgotPassword ? "Forgot Password" : isRegister ? "Register" : "Login"}</h2>
           {error && <p className="text-red-500 text-center">{error}</p>}
           {success && <p className="text-green-500 text-center">{success}</p>}
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700">Email</label>
-            <input
-              type="email"
-              id="email"
-              className="mt-1 block w-full border border-gray-300 rounded-md p-2"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
+            <input type="email" id="email" className="mt-1 block w-full border border-gray-300 rounded-md p-2" value={email} onChange={(e) => setEmail(e.target.value)} />
           </div>
 
           {!isForgotPassword && (
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700">Password</label>
-              <input
-                type="password"
-                id="password"
-                className="mt-1 block w-full border border-gray-300 rounded-md p-2"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
+              <input type="password" id="password" className="mt-1 block w-full border border-gray-300 rounded-md p-2" value={password} onChange={(e) => setPassword(e.target.value)} />
             </div>
           )}
 
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700"
-          >
-            {isForgotPassword
-              ? "Send Reset Link"
-              : isRegister
-              ? "Register"
-              : "Login"}
+          <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700">
+            {isForgotPassword ? "Send Reset Link" : isRegister ? "Register" : "Login"}
           </button>
         </form>
 
-        <button
-          onClick={handleGoogleSignIn}
-          className="w-full bg-red-500 text-white p-2 rounded mt-4 hover:bg-red-600"
-        >
+        <button onClick={handleGoogleSignIn} className="w-full bg-red-500 text-white p-2 rounded mt-4 hover:bg-red-600">
           Sign in with Google
         </button>
 
         <div className="text-center mt-4">
           {!isForgotPassword && (
             <>
-              <p
-                className="text-sm text-blue-600 hover:underline cursor-pointer"
-                onClick={() => setIsForgotPassword(true)}
-              >
+              <p className="text-sm text-blue-600 hover:underline cursor-pointer" onClick={() => setIsForgotPassword(true)}>
                 Forgot Password?
               </p>
-              <p
-                className="text-sm text-gray-700 mt-2"
-              >
+              <p className="text-sm text-gray-700 mt-2">
                 {isRegister ? "Already have an account?" : "Don't have an account?"}
-                <span
-                  className="text-blue-600 hover:underline cursor-pointer ml-1"
-                  onClick={() => setIsRegister(!isRegister)}
-                >
+                <span className="text-blue-600 hover:underline cursor-pointer ml-1" onClick={() => setIsRegister(!isRegister)}>
                   {isRegister ? "Login" : "Register"}
                 </span>
               </p>
             </>
           )}
           {isForgotPassword && (
-            <p
-              className="text-sm text-blue-600 hover:underline cursor-pointer"
-              onClick={() => setIsForgotPassword(false)}
-            >
+            <p className="text-sm text-blue-600 hover:underline cursor-pointer" onClick={() => setIsForgotPassword(false)}>
               Back to Login
             </p>
           )}
